@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import missingno as msno  # Optional: for visualizing missing data
 from scipy import stats
+import matplotlib.pyplot as plt
 
 # Load your dataset into a pandas DataFrame
 df_dummy = pd.read_csv('ML_dummy_dataset.csv') #read the dataset from folder
@@ -14,12 +15,23 @@ print(df_dummy.head())
 def load_data(df):
     return df
 
+# For numeric data, fill missing values with the mean
 def handle_missing_values(df):
-    return df.fillna(df.mean())  # For numeric data, fill missing values with the mean
+    numeric_df = df.select_dtypes(include='number')
+    return df.fillna(numeric_df.mean())
+
 
 def remove_outliers(df):
     z_scores = np.abs(stats.zscore(df.select_dtypes(include=[np.number])))
-    return df[(z_scores < 3).all(axis=1)]  # Remove rows with any outliers
+    print(df)
+    print(z_scores)
+    return df[(z_scores < 3).all(axis=1)]# Remove rows with any outliers
+    # print(df)
+    # feature1 = df['Feature1'].dropna()
+    # z_scores_feature1 = stats.zscore(feature1)
+    # df.loc[feature1.index, 'Feature1_zscore'] = z_scores_feature1
+    # print(df[['Feature1', 'Feature1_zscore']])
+    
 
 def scale_data(df):
     scaler = StandardScaler()
@@ -39,4 +51,14 @@ df_preprocessed = load_data(df_dummy)
 print(df_preprocessed.dtypes)
 
 # Handle missing values
-#df_preprocessed = handle_missing_values(df_preprocessed)
+# df_preprocessed = handle_missing_values(df_preprocessed)
+print('There are '+ str(df_preprocessed.isnull().sum().sum()) +' missing values')
+
+
+df_preprocessed = handle_missing_values(df_preprocessed)
+print(df_preprocessed.isnull().sum())  # Verify that there are no missing values
+
+## Remove outliers
+df_preprocessed = remove_outliers(df_preprocessed)
+
+print(df_preprocessed.tail(3))
